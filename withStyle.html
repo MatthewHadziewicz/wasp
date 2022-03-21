@@ -1,0 +1,119 @@
+<html>
+
+<body>
+    <button id="hitBtn" onclick="game.hit()">HTI!</button>
+    <button id="resetBtn" onclick="game.reset()">RESET</button>
+    <div id="battlefield"></div>
+</body>
+
+</html>
+
+<script>
+
+    class Game {
+        constructor() {
+            this.battlefield = document.getElementById("battlefield");
+            this.population = [
+                { name: 'Queen', qty: 1, hp: 80, hit: 8, style: { top: 0, left: 0, animationName: "" } },
+                { name: 'Worker', qty: 5, hp: 68, hit: 10, style: { top: 0, left: 0, animationName: "" } },
+                { name: 'Drone', qty: 8, hp: 60, hit: 12, style: { top: 0, left: 0, animationName: "" } }
+            ]
+            this.reset();
+        }
+
+        reset() {
+            this.end = false;
+            this.firsStart = true;
+            this.death = []
+            this.wasps = []
+            this.population.map(wasp => {
+                for (var i = 0; i < wasp.qty; i++) {
+                    this.wasps.push({
+                        name: wasp.name, hp: wasp.hp, hit: wasp.hit, style: {
+                            top: this.getRandomIntInclusive(50, 580),
+                            left: this.getRandomIntInclusive(0, 760)
+                        }
+                    })
+                }
+            })
+            this.render()
+        }
+
+        render() {
+            this.battlefield.innerHTML = ""
+            this.wasps.forEach(wasp => {
+                const p = document.createElement('div')
+                p.classList.add('wasp');
+                p.textContent = `${wasp.name} - hp: ${wasp.hp}`
+                p.style.top = wasp.style.top
+                p.style.left = wasp.style.left
+                p.style.animationName = wasp.style.animationName
+                this.battlefield.appendChild(p)
+            })
+            this.wasps.forEach(wasp => wasp.style.animationName = "")
+        }
+        getRandomIntInclusive(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        hit() {
+            if (!this.end) {
+                const random = Math.floor(Math.random() * (this.wasps.length))
+                const waspSelected = this.wasps[random]
+                this.wasps[random].style.animationName = "hit"
+                waspSelected.hp = waspSelected.hp - waspSelected.hit
+                if (waspSelected.hp <= 0) {
+                    this.death.push(waspSelected)
+                    this.wasps.splice(random, 1)
+                }
+
+                this.render()
+                if (this.wasps.length == 0) {
+                    this.end = true
+                    this.battlefield.innerHTML = '<h1>Game over - all wasps are death</h1>'
+                }
+                else if (this.death.find(wasp => wasp.name == "Queen")) {
+                    this.end = true
+                    this.battlefield.innerHTML = '<h1>Game over - Queen is death</h1>'
+                }
+            }
+        }
+    }
+    const game = new Game();
+</script>
+
+<style>
+    body {
+        background-color: #DDDDDD;
+    }
+
+    #battlefield {
+        background-color: #ffffff;
+        width: 1000px;
+        height: 600px;
+    }
+
+    .wasp {
+        position: absolute;
+        background-image: url("./wasp.png");
+        background-repeat: no-repeat;
+        background-size: 30%;
+        background-position: center;
+        background-position-y: 20px;
+        text-align: center;
+        height: 70px;
+        animation-duration: 2s;
+    }
+
+    @keyframes hit {
+        from {
+            background-color: red;
+        }
+
+        to {
+            background-color: none;
+        }
+    }
+</style>

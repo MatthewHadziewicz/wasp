@@ -1,0 +1,75 @@
+<html>
+    <head>
+        <script src="./test.js" ></script>
+    </head>
+<body>
+    <button id="hitBtn">HTI!</button>
+    <button id="resetBtn">RESET</button>
+    <div id="battlefield"></div>
+</body>
+</html>
+
+<script>
+
+    class Game {
+        constructor() {
+            this.battlefield = document.getElementById("battlefield");
+            this.population = [
+                { name: 'Queen', qty: 1, hp: 80, hit: 8 },
+                { name: 'Worker', qty: 5, hp: 68, hit: 10 },
+                { name: 'Drone', qty: 8, hp: 60, hit: 12 }
+            ]
+            this.reset();
+        }
+
+        reset() {
+            this.end = false;
+            this.death = []
+            this.wasps = []
+            this.population.map(wasp => {
+                for (var i = 0; i < wasp.qty; i++) {
+                    this.wasps.push({ name: wasp.name, hp: wasp.hp, hit: wasp.hit })
+                }
+            })
+            this.render()
+        }
+
+        render() {
+            this.battlefield.innerHTML = "";
+            this.battlefield.innerHTML += `<h2>Alive: ${this.wasps.length}</h2>`
+            this.wasps.forEach(wasp => this.battlefield.innerHTML += `<p>${wasp.name} - hp: ${wasp.hp}</p>`
+            )
+            this.battlefield.innerHTML += `<h2>Death : ${this.death.length}</>`
+            this.death.forEach(wasp => this.battlefield.innerHTML += `<p>${wasp.name}</p>`
+            )
+        }
+
+        hit() {
+            if (!this.end) {
+                const random = Math.floor(Math.random() * (this.wasps.length))
+                const waspSelected = this.wasps[random]
+                waspSelected.hp = waspSelected.hp - waspSelected.hit
+                if (waspSelected.hp <= 0) {
+                    this.death.push(waspSelected)
+                    this.wasps.splice(random, 1)
+                }
+                this.render()
+                if(this.wasps.length == 0) {
+                    this.end = true
+                    this.battlefield.innerHTML = '<h1>Game over - all wasps are death</h1>'
+                }
+                if(this.death.find(wasp => wasp.name == "Queen") || this.wasps.find(wasp => wasp.name == "Queen").hp <= 0){
+                    this.end = true
+                    this.battlefield.innerHTML = '<h1>Game over - Queen is death</h1>'
+                }
+            }
+        }
+    }
+    
+    const hitBtn = document.getElementById("hitBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    hitBtn.onclick = () => game.hit();
+    resetBtn.onclick = () => game.reset();
+    const game = new Game();
+    const test = new testGame(game);
+</script>
